@@ -1,6 +1,5 @@
 
 from decision_models.base_agent import BaseAgent
-import numpy
 
 class HumanComplementaryAgent(BaseAgent):
 

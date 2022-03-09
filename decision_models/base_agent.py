@@ -3,7 +3,6 @@ from decision_models.decision_model import DecisionModel
 import util.action_reader as action_reader
 import util.observation_reader as ob_reader
 import util.card_utilities as cu
-import numpy
 
 INSURMOUNTABLE_COST = 1000000
 
@@ -197,7 +196,6 @@ class BaseAgent(DecisionModel):
                         
                     # If this is a singled out playable card than we need to penalize discarding it (probably just a little bit)
                     if singled_out_playable_card_index == card_index:
-                    # if singled_out_cards[card_index]:
                         legal_move_point_values[index] -= self.singled_out_playable_discard_penalty
                         move_score_description += "{:.2f} for discarding a singled out playable card, ".format(-self.singled_out_playable_discard_penalty)
                         say(f"I'm slightly biased against {legal_moves[index]} because it would discard a card that was singled out and playable.")

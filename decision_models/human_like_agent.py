@@ -1,6 +1,5 @@
 
 from decision_models.decision_model import DecisionModel
-import numpy
 
 # Constants that do not need to be varied
 INSURMOUNTABLE_COST = 1000000
