@@ -3,15 +3,33 @@ from decision_models.decision_model import DecisionModel
 import util.observation_reader as ob_reader
 import copy
 from util.decision_basis import DecisionBasis
-import jsonpickle
+import pickle
+import time
+import os
 
-RECORD_HUMAN_ACTIONS = False
+LOG_INT_LIMIT = 1000000
 
 class RealHuman(DecisionModel):
 
 	"""
 	This is an interactive decision model that allows a human observer to make decisions via the console. This decision model is named after the developer.
 	"""
+
+	def __init__(self, is_before_instruction = True):
+		super().__init__()
+		# Create a log file for the human decisions
+		self.is_before_instruction = is_before_instruction
+		for i in range(1, LOG_INT_LIMIT):
+			candidate_filename = os.path.join(os.getcwd(), "logs", f"human_decision_log_{i}.obj")
+			if not os.path.exists(candidate_filename):
+				self.filename = candidate_filename
+				self.log_index = i
+				file = open(self.filename, "wb")
+				pickle.dump([], file)
+				file.close()
+				break
+		print("Error creating human decision log file.")
+
 
 	def get_variant_name(self):
 		return f"RealHuman"
@@ -21,7 +39,7 @@ class RealHuman(DecisionModel):
 		
 		legal_moves = ob_reader.get_legal_moves(observation)
 		if len(legal_moves) == 0:
-			return None, None, None
+			return None, None, None, None, None
 	
 		observation_to_show = copy.deepcopy(observation)
 		observation_to_show["card_knowledge"][1] = []
@@ -66,20 +84,25 @@ class RealHuman(DecisionModel):
 				print("Couldn't parse as int")
 			
 		# Record decision basis and move
-		if RECORD_HUMAN_ACTIONS:
-			decision_basis = DecisionBasis(observation, my_not_clues, other_player_not_clues, playable_probabilities, safely_discardable_probabilities, unneeded_probabilities,
+
+		decision_basis = DecisionBasis(observation, my_not_clues, other_player_not_clues, playable_probabilities, safely_discardable_probabilities, unneeded_probabilities,
 		hint_nuggets, singled_out_playable_card_index, singled_out_cards, move_index)
 
-			self.record_decision_basis(decision_basis)
+		self.record_decision_basis(decision_basis)
 			
 		print(f"Making this move: {legal_moves[move_index]}")
 
-		return legal_moves[move_index], move_index, None
+		return legal_moves[move_index], move_index, None, None, None
 
 	def record_decision_basis(self, decision_basis):
-		string_to_log = jsonpickle.encode(decision_basis)
-		
-		output_file = open("logs/human_decision_log.txt", "a")
-		output_file.write(string_to_log)
-		output_file.write("\n")
-		output_file.close()
+
+		# Load the log if it exists
+		file = open(self.filename, "rb")
+		decision_bases = pickle.load(file)
+		file.close()
+
+		decision_bases.append(decision_basis)
+
+		file = open(self.filename, "wb")
+		pickle.dump(decision_bases, file)
+		file.close()

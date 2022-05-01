@@ -46,7 +46,7 @@ class MyPolicy():
 		self.cached_observation = copy.deepcopy(my_observation)
 
 		# Apply the decision model. Pass in all of the distilled quantities that we calculated earlier in this method.
-		next_move, _, _ = self.decision_model.decide_move(my_observation, self.my_not_clues, self.other_player_not_clues, playable_probabilities, 
+		next_move, _, _, _, _ = self.decision_model.decide_move(my_observation, self.my_not_clues, self.other_player_not_clues, playable_probabilities, 
 			safely_discardable_probabilities, unneeded_probabilities, hint_nuggets, singled_out_playable_card_index, self.singled_out_cards, self.say)
 		
 		return next_move
